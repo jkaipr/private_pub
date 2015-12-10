@@ -24,7 +24,11 @@ function buildPrivatePub(doc) {
     },
 
     connectToFaye: function() {
-      self.fayeClient = new Faye.Client(self.subscriptions.server);
+      self.fayeClient = new Faye.Client(self.subscriptions.server, self.subscriptions.websocket ? { 
+               endpoints: {
+                  websocket: self.subscriptions.websocket // '/faye-ws'
+                }
+              } : {});
       self.fayeClient.addExtension(self.fayeExtension);
       for (var i=0; i < self.fayeCallbacks.length; i++) {
         self.fayeCallbacks[i](self.fayeClient);
@@ -47,6 +51,9 @@ function buildPrivatePub(doc) {
     sign: function(options) {
       if (!self.subscriptions.server) {
         self.subscriptions.server = options.server;
+      }
+      if (options.websocket) {
+        self.subscriptions.websocket = options.websocket;
       }
       self.subscriptions[options.channel] = options;
       self.faye(function(faye) {
